@@ -30,6 +30,11 @@ if(AR_BOOST_PATH)
 	include_directories(${AR_BOOST_PATH})
 endif()
 
+set(AR_EINGEN_INCLUDE_DIR "" CACHE PATH "Use specific Eigen include folder?")
+if(NOT "${AR_EINGEN_INCLUDE_DIR}" STREQUAL "")
+	include_directories("${AR_EINGEN_INCLUDE_DIR}")
+endif()
+
 add_subdirectory(lib)
 add_subdirectory(unit_tests)
 add_subdirectory(trainer)
