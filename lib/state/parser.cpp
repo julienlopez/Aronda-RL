@@ -4,6 +4,8 @@
 
 #include <nlohmann_json/json.hpp>
 
+#include <gsl/gsl_assert>
+
 namespace Aronda::State
 {
 
@@ -13,6 +15,32 @@ namespace Aronda::State
 
 		enum class Player {Black, White};
 
+		/**
+		* @brief returns a 1-hot vector (zero everywhere except for on index set to one) of size 'state_size'
+		* @pre index < state_size
+		*/
+		template<std::size_t state_size>
+		Eigen::Matrix<float, 1, state_size> oneHot(const std::size_t index)
+		{
+			Expects(index < state_size);
+			Eigen::Array<float, 1, state_size> res;
+			for (std::size_t i = 0; i < state_size; i++)
+				res(i) = ((i == index) ? 1.f : 0.f);
+			return res.matrix();
+		}
+
+		auto stringToPlayer(const std::string& str)
+		{
+			Expects(str == "WHITE" || str == "BLACK");
+			return str == "WHITE" ?  Player::White : Player::Black;
+		}
+
+		Eigen::Matrix<float, 1, number_of_state_per_square - 2> encodeSquareSquareStones()
+		{
+			// return Eigen::Matrix<float, 1, number_of_state_per_square - 2>::Zero();
+			return oneHot<number_of_state_per_square - 2>(0);
+		}
+
 		Row_t parseSquare(const nlohmann::json& square, const Player current_player)
 		{
 			if (!square.is_object())
@@ -21,23 +49,32 @@ namespace Aronda::State
 			std::cout << square["conqueringColor"].dump() << std::endl;
 			if (!square["conqueringColor"].is_string())
 				throw std::runtime_error("Unable to parse json string");
-			return {};
+			const auto conquering_color = square["conqueringColor"];
+			if (conquering_color != "null")
+			{
+				if (stringToPlayer(conquering_color) == current_player)
+					return oneHot<number_of_state_per_square>(number_of_state_per_square - 2);
+				else
+					return oneHot<number_of_state_per_square>(number_of_state_per_square - 1);
+			}
+			else
+			{
+				Eigen::Matrix<float, 1, number_of_state_per_square> res;
+				res << encodeSquareSquareStones(), Eigen::Matrix<float, 1, 2>::Zero();
+				return res;
+			}
 		}
 
 		Player currentPlayer(const nlohmann::json& json)
 		{
-			const std::string current_player = json["currentPlayer"];
-			std::cout << current_player << std::endl;
-			if (current_player == "WHITE")
-				return Player::White;
-			return Player::Black;
+			return stringToPlayer(json["currentPlayer"]);
 		}
 
 	}
 
 	State Parser::parse(const std::string& json_string)
 	{
-		State res;
+		State res = State::Zero();
 		const auto json = nlohmann::json::parse(json_string);
 		if (!json.is_object())
 			throw std::runtime_error("Unable to parse json string");
@@ -45,9 +82,10 @@ namespace Aronda::State
 		const auto it = json.find("squares");
 		if(it == end(json) || !it->is_array())
 			throw std::runtime_error("Unable to parse json string");
-		if(it->size() < res.cols())
+		const auto squares = it->get<nlohmann::json::array_t>();
+		if(squares.size() < res.rows())
 			throw std::runtime_error("Unable to parse json string");
-		for (int i = 0; i < res.cols(); i++) // TODO better handle multiple center 
+		for (int i = 0; i < res.rows(); i++) // TODO better handle multiple center 
 		{
 			res.row(i) = parseSquare((*it)[i], current_player);
 		}

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(Aronda)
+project(Aronda-RL)
 
 include_directories(3rd_party/catch2)
 include_directories(3rd_party/range)
