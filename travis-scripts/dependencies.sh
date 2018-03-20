@@ -8,3 +8,5 @@ sudo apt-get update
 sudo apt-get install -y cmake libboost-all-dev gcc-7 g++-7 lcov libeigen3-dev
 
 sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 90
+
+ls -l /usr/include
