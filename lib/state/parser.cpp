@@ -37,10 +37,18 @@ namespace Aronda::State
 			return str == "WHITE" ?  Player::White : Player::Black;
 		}
 
+		template<class T> auto getOrThrow(const nlohmann::json& json, const std::string& key)
+		{
+			const auto it = json.find(key);
+			if (it == end(json))
+				throw std::runtime_error(("Unable to find " + key + " in " + json.dump()).c_str());
+			return it->get<T>();
+		}
+
 		Eigen::Matrix<float, 1, 5> encodeSquareStonesForPlayer(const nlohmann::json& square, const Player player)
 		{
-			const auto number_of_black_stones = square["numberOfBlackPawns"].get<int>();
-			const auto number_of_white_stones = square["numberOfWhitePawns"].get<int>();
+			const auto number_of_black_stones = getOrThrow<int>(square, "numberOfBlackPawns");
+			const auto number_of_white_stones = getOrThrow<int>(square, "numberOfWhitePawns");
 			return oneHot<5>(player == Player::Black ? number_of_black_stones : number_of_white_stones);
 		}
 
@@ -54,11 +62,7 @@ namespace Aronda::State
 		{
 			if (!square.is_object())
 				throw std::runtime_error("Unable to parse json string");
-			std::cout << square.dump() << std::endl;
-			std::cout << square["conqueringColor"].dump() << std::endl;
-			if (!square["conqueringColor"].is_string())
-				throw std::runtime_error("Unable to parse json string");
-			const auto conquering_color = square["conqueringColor"];
+			const auto conquering_color = getOrThrow<std::string>(square, "conqueringColor");
 			if (conquering_color != "null")
 			{
 				if (stringToPlayer(conquering_color) == current_player)
@@ -76,7 +80,7 @@ namespace Aronda::State
 
 		Player currentPlayer(const nlohmann::json& json)
 		{
-			return stringToPlayer(json["currentPlayer"]);
+			return stringToPlayer(getOrThrow<std::string>(json, "currentPlayer"));
 		}
 
 	}
@@ -88,15 +92,12 @@ namespace Aronda::State
 		if (!json.is_object())
 			throw std::runtime_error("Unable to parse json string");
 		const auto current_player = currentPlayer(json);
-		const auto it = json.find("squares");
-		if(it == end(json) || !it->is_array())
-			throw std::runtime_error("Unable to parse json string");
-		const auto squares = it->get<nlohmann::json::array_t>();
+		const auto squares = getOrThrow<nlohmann::json::array_t>(json, "squares");
 		if(squares.size() < res.rows())
 			throw std::runtime_error("Unable to parse json string");
 		for (int i = 0; i < res.rows(); i++) // TODO better handle multiple center 
 		{
-			res.row(i) = parseSquare((*it)[i], current_player);
+			res.row(i) = parseSquare(squares[i], current_player);
 		}
 		return res;
 	}
