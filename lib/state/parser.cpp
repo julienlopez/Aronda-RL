@@ -6,6 +6,8 @@
 
 #include <gsl/gsl_assert>
 
+#include <unsupported/Eigen/KroneckerProduct>
+
 namespace Aronda::State
 {
 
@@ -35,10 +37,17 @@ namespace Aronda::State
 			return str == "WHITE" ?  Player::White : Player::Black;
 		}
 
-		Eigen::Matrix<float, 1, number_of_state_per_square - 2> encodeSquareSquareStones()
+		Eigen::Matrix<float, 1, 5> encodeSquareStonesForPlayer(const nlohmann::json& square, const Player player)
 		{
-			// return Eigen::Matrix<float, 1, number_of_state_per_square - 2>::Zero();
-			return oneHot<number_of_state_per_square - 2>(0);
+			const auto number_of_black_stones = square["numberOfBlackPawns"].get<int>();
+			const auto number_of_white_stones = square["numberOfWhitePawns"].get<int>();
+			return oneHot<5>(player == Player::Black ? number_of_black_stones : number_of_white_stones);
+		}
+
+		Eigen::Matrix<float, 1, number_of_state_per_square - 2> encodeSquareStones(const nlohmann::json& square, const Player current_player)
+		{
+			const auto other_player = current_player == Player::Black ? Player::White : Player::Black;
+			return Eigen::kroneckerProduct(encodeSquareStonesForPlayer(square, current_player), encodeSquareStonesForPlayer(square, other_player));
 		}
 
 		Row_t parseSquare(const nlohmann::json& square, const Player current_player)
@@ -60,7 +69,7 @@ namespace Aronda::State
 			else
 			{
 				Eigen::Matrix<float, 1, number_of_state_per_square> res;
-				res << encodeSquareSquareStones(), Eigen::Matrix<float, 1, 2>::Zero();
+				res << encodeSquareStones(square, current_player), Eigen::Matrix<float, 1, 2>::Zero();
 				return res;
 			}
 		}
