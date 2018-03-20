@@ -1,0 +1,32 @@
+language: cpp
+sudo: required
+dist: trusty
+
+compiler:
+  - gcc
+
+os:
+  - linux
+
+before_install:
+  - sudo chmod 777 ./travis-scripts/*
+  - ./travis-scripts/dependencies.sh
+  # Codecov
+  - sudo pip install codecov
+
+script:
+  - ./travis-scripts/build.sh
+
+after_success:
+  # Creating report
+  - cd ${TRAVIS_BUILD_DIR}
+  - lcov --directory libs --directory  gui --directory build --capture --no-external --output-file coverage.info # capture coverage info
+  - lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter out system
+  - lcov --remove coverage.info '3rd_party/*' --output-file coverage.info # filter out system
+  - lcov --list coverage.info #debug info
+  # Uploading report to CodeCov
+  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+
+branches:
+  only:
+  - master

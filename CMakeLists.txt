@@ -15,11 +15,6 @@ else()
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage" )
 endif()
 
-set(AR_ETL_PATH "" CACHE PATH "Path for ETL header files.")
-if(AR_ETL_PATH)
-	include_directories(${AR_ETL_PATH})
-endif()
-
 set(AR_GSL_PATH "" CACHE PATH "Path for GSL header files.")
 if(AR_GSL_PATH)
 	include_directories(${AR_GSL_PATH})
