@@ -6,7 +6,7 @@ sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 sudo apt-get update -qq
 sudo apt-get update
 
-sudo apt-chache search eigen
+sudo apt-cache search eigen
 
 sudo apt-get install -y cmake libboost-all-dev gcc-7 g++-7 lcov eigen
 
