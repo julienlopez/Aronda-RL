@@ -5,13 +5,11 @@
 namespace Aronda::State
 {
 
-	class Parser
-	{
-	public:
+class Parser
+{
+public:
+    static State parse(const std::string& json_string);
 
-		static State parse(const std::string& json_string);
-
-	private:
-	};
-
+private:
+};
 }
