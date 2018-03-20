@@ -1,9 +1,7 @@
 #!/bin/bash
 
 git clone https://github.com/Microsoft/GSL
-
-ls -la
-ls -la GSL
+sudo ln -s $PWD/GSL/include/gsl /usr/include
 
 sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 sudo apt-get update -qq
