@@ -53,3 +53,18 @@ TEST_CASE("Reading state from json string", "[parser]")
         CHECK(state.row(0) == oneMoveForCurrentPlayerOnSquare1());
     }
 }
+
+TEST_CASE("Reading row state from json string", "[parser]")
+{
+    SECTION("Reading an empty square is the same for both players")
+    {
+        nlohmann::json json;
+        json["numberOfBlackPawns"] = 0;
+        json["numberOfWhitePawns"] = 0;
+        json["conqueringColor"] = "null";
+        const auto state_for_black = Aronda::State::Parser::parseSquare(json, Aronda::State::Player::Black);
+        const auto state_for_white = Aronda::State::Parser::parseSquare(json, Aronda::State::Player::White);
+        CHECK(state_for_black == state_for_white);
+        CHECK(state_for_black == emptySquareState());
+    }
+}
