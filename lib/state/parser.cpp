@@ -1,7 +1,5 @@
 #include "parser.hpp"
 
-#include <gsl/gsl_assert>
-
 #include <unsupported/Eigen/KroneckerProduct>
 
 namespace Aronda::State
@@ -9,18 +7,6 @@ namespace Aronda::State
 
 namespace
 {
-    /**
-     * @brief returns a 1-hot vector (zero everywhere except for on index set to one) of size 'state_size'
-     * @pre index < state_size
-     */
-    template <std::size_t state_size> Eigen::Matrix<float, 1, state_size> oneHot(const std::size_t index)
-    {
-        Expects(index < state_size);
-        Eigen::Array<float, 1, state_size> res;
-        for(std::size_t i = 0; i < state_size; i++)
-            res(i) = ((i == index) ? 1.f : 0.f);
-        return res.matrix();
-    }
 
     auto stringToPlayer(const std::string& str)
     {
@@ -35,15 +21,15 @@ namespace
         return it->get<T>();
     }
 
-    Eigen::Matrix<float, 1, 5> encodeSquareStonesForPlayer(const nlohmann::json& square, const Player player)
+    Utils::Matrix<1, 5> encodeSquareStonesForPlayer(const nlohmann::json& square, const Player player)
     {
         const auto number_of_black_stones = getOrThrow<int>(square, "numberOfBlackPawns");
         const auto number_of_white_stones = getOrThrow<int>(square, "numberOfWhitePawns");
-        return oneHot<5>(player == Player::Black ? number_of_black_stones : number_of_white_stones);
+        return Utils::oneHot<5>(player == Player::Black ? number_of_black_stones : number_of_white_stones);
     }
 
-    Eigen::Matrix<float, 1, number_of_state_per_square - 2> encodeSquareStones(const nlohmann::json& square,
-                                                                               const Player current_player)
+    Utils::Matrix<1, number_of_state_per_square - 2> encodeSquareStones(const nlohmann::json& square,
+                                                                        const Player current_player)
     {
         const auto other_player = current_player == Player::Black ? Player::White : Player::Black;
         return Eigen::kroneckerProduct(encodeSquareStonesForPlayer(square, current_player),
@@ -78,14 +64,14 @@ Square Parser::parseSquare(const nlohmann::json& square, const Player current_pl
     if(conquering_color != "null")
     {
         if(stringToPlayer(conquering_color) == current_player)
-            return oneHot<number_of_state_per_square>(number_of_state_per_square - 2);
+            return Utils::oneHot<number_of_state_per_square>(number_of_state_per_square - 2);
         else
-            return oneHot<number_of_state_per_square>(number_of_state_per_square - 1);
+            return Utils::oneHot<number_of_state_per_square>(number_of_state_per_square - 1);
     }
     else
     {
-        Eigen::Matrix<float, 1, number_of_state_per_square> res;
-        res << encodeSquareStones(square, current_player), Eigen::Matrix<float, 1, 2>::Zero();
+        Utils::Matrix<1, number_of_state_per_square> res;
+        res << encodeSquareStones(square, current_player), Utils::Matrix<1, 2>::Zero();
         return res;
     }
 }

@@ -11,19 +11,17 @@ std::string readAll(std::istream& is)
     return {std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>()};
 }
 
-using SquareState_t = Eigen::Matrix<float, 1, Aronda::State::number_of_state_per_square>;
-
-SquareState_t emptySquareState()
+Aronda::State::Square emptySquareState()
 {
-    SquareState_t res;
-    res << 1.f, Eigen::Matrix<float, 1, Aronda::State::number_of_state_per_square - 1>::Zero();
+    Aronda::State::Square res;
+    res << 1.f, Aronda::Utils::Matrix<1, Aronda::State::number_of_state_per_square - 1>::Zero();
     return res;
 }
 
-SquareState_t oneMoveForCurrentPlayerOnSquare1()
+Aronda::State::Square oneMoveForCurrentPlayerOnSquare1()
 {
-    SquareState_t res;
-    res << 0.f, 1.f, Eigen::Matrix<float, 1, Aronda::State::number_of_state_per_square - 2>::Zero();
+    Aronda::State::Square res;
+    res << 0.f, 1.f, Aronda::Utils::Matrix<1, Aronda::State::number_of_state_per_square - 2>::Zero();
     return res;
 }
 }
