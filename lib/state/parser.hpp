@@ -8,7 +8,7 @@ namespace Aronda::State
 class Parser
 {
 public:
-    static State parse(const std::string& json_string);
+    static Board parse(const std::string& json_string);
 
 private:
 };

@@ -13,8 +13,6 @@ namespace Aronda::State
 
 namespace
 {
-    using Row_t = Eigen::Matrix<float, 1, number_of_state_per_square>;
-
     enum class Player
     {
         Black,
@@ -87,9 +85,9 @@ namespace
     }
 }
 
-State Parser::parse(const std::string& json_string)
+Board Parser::parse(const std::string& json_string)
 {
-    State res = State::Zero();
+    Board res = Board::Zero();
     const auto json = nlohmann::json::parse(json_string);
     if(!json.is_object()) throw std::runtime_error("Unable to parse json string");
     const auto current_player = currentPlayer(json);
