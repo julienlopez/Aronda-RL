@@ -21,7 +21,7 @@ namespace
         return container[index];
     }
 
-    auto argmax(const State& state_action)
+    auto argmax(const Action& state_action)
     {
         std::vector<int> max_index_list;
         auto max_value = state_action[0];
@@ -40,16 +40,11 @@ namespace
         return draw(max_index_list);
     }
 
-    Action densityToOneHot(Action a)
-    {
-        //  TODO std::max_element(begin(a), end(a));
-        return a;
-    }
-
     namespace Game
     {
-        std::tuple<boost::optional<State>, double, bool> play(const State& state, const Action& action)
+        std::tuple<boost::optional<State>, double, bool> play(const State& state, const std::size_t action)
         {
+            const auto action_vector = Utils::oneHotCol<Aronda::State::number_of_square>(action);
             return {};
         }
 
@@ -83,15 +78,15 @@ double Agent::run()
 
 void Agent::saveModel(const std::string& path) const
 {
+    m_brain.save(path);
 }
 
-Action Agent::act(const State& state)
+std::size_t Agent::act(const State& state)
 {
     if(std::uniform_real_distribution<>(0., 1.)(rng()) < m_epsilon)
-        return Utils::oneHotCol<Aronda::State::number_of_square>(
-            std::uniform_int_distribution<std::size_t>(0, Aronda::State::number_of_square - 1)(rng()));
+        return std::uniform_int_distribution<std::size_t>(0, Aronda::State::number_of_square - 1)(rng());
     else
-        return densityToOneHot(m_brain.predict(state));
+        return argmax(m_brain.predict(state));
 }
 
 void Agent::observe(Step step)
@@ -149,11 +144,11 @@ void Agent::replay()
     auto[s, a, r, s_] = sample;
 
     // CNTK : [0] because of sequence dimension
-    auto t = p[0];
+    auto t = p;
     if(s_)
-        t = r + GAMMA * argmax(p_);
+        t[a] = r + GAMMA * argmax(p_);
     else
-        t = r;
+        t[a] = r;
 
     const auto x = s;
     const auto y = t;

@@ -15,6 +15,8 @@ else()
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage" )
 endif()
 
+set(AR_CNTK_VERSION "2.4" CACHE STRING "Use specific CNTK version?")
+
 set(AR_GSL_PATH "" CACHE PATH "Path for GSL header files.")
 if(AR_GSL_PATH)
 	include_directories(${AR_GSL_PATH})
@@ -28,6 +30,12 @@ endif()
 set(AR_EINGEN_INCLUDE_DIR "" CACHE PATH "Use specific Eigen include folder?")
 if(NOT "${AR_EINGEN_INCLUDE_DIR}" STREQUAL "")
 	include_directories("${AR_EINGEN_INCLUDE_DIR}")
+endif()
+
+set(AR_CNTK_ROOT_DIR "" CACHE PATH "Use specific CNTK folder?")
+if(NOT "${AR_CNTK_ROOT_DIR}" STREQUAL "")
+	include_directories("${AR_CNTK_ROOT_DIR}/Include")
+	link_directories("${AR_CNTK_ROOT_DIR}/cntk")
 endif()
 
 add_subdirectory(lib)

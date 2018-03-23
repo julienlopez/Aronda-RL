@@ -13,7 +13,7 @@ public:
     struct Step
     {
         State s;
-        Action a;
+        std::size_t a; // index of an Action to form 1-hot action vector
         double r;
         boost::optional<State> s_;
     };
@@ -39,7 +39,7 @@ private:
     std::size_t m_steps = 0;
     double m_epsilon = MAX_EPSILON;
 
-    Action act(const State& s);
+    std::size_t act(const State& s);
 
     void observe(Step step);
 
