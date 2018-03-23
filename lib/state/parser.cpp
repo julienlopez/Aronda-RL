@@ -25,7 +25,7 @@ namespace
     {
         const auto number_of_black_stones = getOrThrow<int>(square, "numberOfBlackPawns");
         const auto number_of_white_stones = getOrThrow<int>(square, "numberOfWhitePawns");
-        return Utils::oneHot<5>(player == Player::Black ? number_of_black_stones : number_of_white_stones);
+        return Utils::oneHotRow<5>(player == Player::Black ? number_of_black_stones : number_of_white_stones);
     }
 
     Utils::Matrix<1, number_of_state_per_square - 2> encodeSquareStones(const nlohmann::json& square,
@@ -64,9 +64,9 @@ Square Parser::parseSquare(const nlohmann::json& square, const Player current_pl
     if(conquering_color != "null")
     {
         if(stringToPlayer(conquering_color) == current_player)
-            return Utils::oneHot<number_of_state_per_square>(number_of_state_per_square - 2);
+            return Utils::oneHotRow<number_of_state_per_square>(number_of_state_per_square - 2);
         else
-            return Utils::oneHot<number_of_state_per_square>(number_of_state_per_square - 1);
+            return Utils::oneHotRow<number_of_state_per_square>(number_of_state_per_square - 1);
     }
     else
     {
