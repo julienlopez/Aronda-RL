@@ -1,6 +1,6 @@
 #include "parser.hpp"
 
-#include <unsupported/Eigen/KroneckerProduct>
+#include <eigen3/unsupported/Eigen/KroneckerProduct>
 
 namespace Aronda::State
 {

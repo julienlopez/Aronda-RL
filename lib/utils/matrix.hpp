@@ -2,7 +2,7 @@
 
 #include <gsl/gsl_assert>
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 namespace Aronda::Utils
 {

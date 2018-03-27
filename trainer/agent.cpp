@@ -143,7 +143,6 @@ void Agent::replay()
 
     auto[s, a, r, s_] = sample;
 
-    // CNTK : [0] because of sequence dimension
     auto t = p;
     if(s_)
         t[a] = r + GAMMA * argmax(p_);
