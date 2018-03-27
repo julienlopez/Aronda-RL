@@ -50,6 +50,17 @@ namespace
         return Times(outputTimesParam, classifierRoot, 1, outputName);
     }
 
+    void PrintTrainingProgress(const CNTK::TrainerPtr trainer, size_t minibatchIdx, size_t outputFrequencyInMinibatches)
+    {
+        if((minibatchIdx % outputFrequencyInMinibatches) == 0 && trainer->PreviousMinibatchSampleCount() != 0)
+        {
+            double trainLossValue = trainer->PreviousMinibatchLossAverage();
+            double evaluationValue = trainer->PreviousMinibatchEvaluationAverage();
+            printf("Minibatch %d: CrossEntropy loss = %.8g, Evaluation criterion = %.8g\n", (int)minibatchIdx,
+                   trainLossValue, evaluationValue);
+        }
+    }
+
     inline bool getVariableByName(std::vector<CNTK::Variable> variableLists, std::wstring varName, CNTK::Variable& var)
     {
         for(std::vector<CNTK::Variable>::iterator it = variableLists.begin(); it != variableLists.end(); ++it)
@@ -92,6 +103,9 @@ namespace Impl
                                                              c_output_var_name);
             getOutputVariableByName(m_model, c_output_var_name, m_output);
 
+            auto trainingLoss = CrossEntropyWithSoftmax(m_model, m_output, L"lossFunction");
+            auto prediction = ClassificationError(m_model, m_output, 5, L"predictionError");
+
             // python example
             // # loss = 'mse'
             // loss = C.reduce_mean(C.square(model - q_target), axis = 0)
@@ -102,6 +116,10 @@ namespace Impl
             // lr_schedule = C.learning_parameter_schedule(lr)
             // learner = C.sgd(model.parameters, lr_schedule, gradient_clipping_threshold_per_sample = 10)
             // trainer = C.Trainer(model, (loss, meas), learner)
+
+            CNTK::LearningRateSchedule learningRatePerSample = 0.1;
+            m_trainer = CNTK::CreateTrainer(m_model, trainingLoss, prediction,
+                                            {CNTK::SGDLearner(m_model->Parameters(), learningRatePerSample)});
         }
 
         void save(const std::string& path) const
@@ -137,6 +155,20 @@ namespace Impl
 
         void train(const State& state, const Action& action)
         {
+            const size_t minibatchSize = 1;
+            size_t numMinibatchesToTrain = 1;
+            size_t outputFrequencyInMinibatches = 1;
+            // auto minibatchSource = createMiniBatch(state, action);
+            // for (size_t i = 0; i < numMinibatchesToTrain; ++i)
+            // {
+            // 	auto minibatchData = minibatchSource->GetNextMinibatch(minibatchSize, m_device);
+            // 	m_trainer->TrainMinibatch({ { m_input, minibatchData[imageStreamInfo] },{ m_output,
+            // minibatchData[labelStreamInfo] } }, m_device); 	PrintTrainingProgress(m_trainer, i,
+            // outputFrequencyInMinibatches);
+            // }
+            const auto minibatch = createMiniBatch(state, action);
+            m_trainer->TrainMinibatch({{m_input, minibatch.first}, {m_output, minibatch.second}}, m_device);
+            PrintTrainingProgress(m_trainer, 0, outputFrequencyInMinibatches);
         }
 
     private:
@@ -144,6 +176,34 @@ namespace Impl
         CNTK::FunctionPtr m_model;
         CNTK::Variable m_input;
         CNTK::Variable m_output;
+        CNTK::TrainerPtr m_trainer;
+
+        std::pair<CNTK::ValuePtr, CNTK::ValuePtr> createMiniBatch(const State& state, const Action& action) const
+        {
+            const std::size_t batchSize = 1;
+            size_t inputDim = state.rows() * state.cols();
+            size_t numOutputClasses = action.rows() * action.cols();
+
+            std::vector<float> inputData(inputDim * batchSize);
+            size_t dataIndex = 0;
+            for(int i = 0; i < state.rows(); i++)
+            {
+                for(int j = 0; j < state.cols(); j++)
+                {
+                    inputData[dataIndex++] = state(i, j);
+                }
+            }
+            auto inputDataValue = CNTK::Value::CreateBatch(m_input.Shape(), inputData, m_device);
+
+            std::vector<float> outputData(numOutputClasses * batchSize);
+            dataIndex = 0;
+            for(int n = 0; n < numOutputClasses; ++n)
+            {
+                outputData[dataIndex++] = action(n);
+            }
+            auto outputDataValue = CNTK::Value::CreateBatch(m_output.Shape(), outputData, m_device);
+            return std::make_pair(inputDataValue, outputDataValue);
+        }
     };
 
     const std::wstring Brain::c_input_var_name = L"state";
