@@ -1,5 +1,7 @@
 #include "agent.hpp"
+#include "jaronda.hpp"
 
+#include <iostream>
 #include <random>
 
 namespace Aronda::Trainer
@@ -39,40 +41,26 @@ namespace
         }
         return draw(max_index_list);
     }
-
-    namespace Game
-    {
-        std::tuple<boost::optional<State>, double, bool> play(const State& state, const std::size_t action)
-        {
-            const auto action_vector = Utils::oneHotCol<Aronda::State::number_of_square>(action);
-            return {};
-        }
-
-        State begin()
-        {
-            return {};
-        }
-    }
 }
 
 double Agent::run()
 {
     double R = 0.;
-    State s = Game::begin();
+    JAronda game{"11815"};
+    State s = game.begin();
     while(true)
     {
         const auto a = act(s);
-        auto[s_, r, done] = Game::play(s, a);
+        auto res = game.play(s, a);
 
-        if(done) // terminal state
-            s_ = boost::none;
-
-        observe({s, a, r, s_});
+        observe({s, a, res.reward, res.new_state});
         replay();
 
-        R += r;
-        if(done) return R;
-        s = *s_;
+        R += res.reward;
+        if(res.new_state)
+            s = *res.new_state;
+        else
+            return R;
     }
 }
 
