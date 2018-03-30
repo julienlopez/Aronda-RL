@@ -13,27 +13,35 @@ const std::size_t MEMORY_CAPACITY = 100000;
 
 int main()
 {
-    Agent agent;
-
-    std::size_t episode_number = 0;
-    double reward_sum = 0.;
-    while(episode_number < TOTAL_EPISODES)
+    try
     {
-        reward_sum += agent.run();
-        episode_number += 1;
-        if(episode_number % BATCH_SIZE_BASELINE == 0)
+        Agent agent;
+
+        std::size_t episode_number = 0;
+        double reward_sum = 0.;
+        while(episode_number < TOTAL_EPISODES)
         {
-            std::cout << "Episode: " << episode_number << ", Average reward for episode "
-                      << reward_sum / BATCH_SIZE_BASELINE << "." << std::endl;
-            if(reward_sum / BATCH_SIZE_BASELINE > REWARD_TARGET)
+            reward_sum += agent.run();
+            episode_number += 1;
+            if(episode_number % BATCH_SIZE_BASELINE == 0)
             {
-                std::cout << "Task solved in " << episode_number << " episodes" << std::endl;
-                break;
+                std::cout << "Episode: " << episode_number << ", Average reward for episode "
+                          << reward_sum / BATCH_SIZE_BASELINE << "." << std::endl;
+                if(reward_sum / BATCH_SIZE_BASELINE > REWARD_TARGET)
+                {
+                    std::cout << "Task solved in " << episode_number << " episodes" << std::endl;
+                    break;
+                }
+                reward_sum = 0;
             }
-            reward_sum = 0;
         }
+        agent.saveModel("dqn.mod");
     }
-    agent.saveModel("dqn.mod");
+    catch(const std::exception& ex)
+    {
+        std::wcerr << ex.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }

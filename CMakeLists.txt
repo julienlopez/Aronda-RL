@@ -38,6 +38,12 @@ if(NOT "${AR_CNTK_ROOT_DIR}" STREQUAL "")
 	link_directories("${AR_CNTK_ROOT_DIR}/cntk")
 endif()
 
+set(AR_CURL_ROOT_DIR "" CACHE PATH "Use specific curl folder?")
+if(NOT "${AR_CURL_ROOT_DIR}" STREQUAL "")
+	include_directories("${AR_CURL_ROOT_DIR}/include")
+	link_directories("${AR_CURL_ROOT_DIR}/lib")
+endif()
+
 add_subdirectory(lib)
 add_subdirectory(unit_tests)
 add_subdirectory(trainer)
