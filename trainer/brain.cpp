@@ -2,6 +2,8 @@
 
 #include <CNTKLibrary.h>
 
+#include <iostream>
+
 namespace Aronda::Trainer
 {
 
@@ -56,7 +58,7 @@ namespace
         {
             double trainLossValue = trainer->PreviousMinibatchLossAverage();
             double evaluationValue = trainer->PreviousMinibatchEvaluationAverage();
-            printf("Minibatch %d: CrossEntropy loss = %.8g, Evaluation criterion = %.8g\n", (int)minibatchIdx,
+            printf("Minibatch %d: loss = %.8g, Evaluation criterion = %.8g\n", (int)minibatchIdx,
                    trainLossValue, evaluationValue);
         }
     }
@@ -104,8 +106,15 @@ namespace Impl
                                                              c_output_var_name);
             getOutputVariableByName(m_model, c_output_var_name, m_output);
 
-            auto trainingLoss = CrossEntropyWithSoftmax(m_model, m_output, L"lossFunction");
-            auto prediction = ClassificationError(m_model, m_output, 5, L"predictionError");
+            // auto trainingLoss = CrossEntropyWithSoftmax(m_model, m_output, L"lossFunction");
+            // auto prediction = ClassificationError(m_model, m_output, 5, L"predictionError");
+
+			// auto trainingLoss = SquaredError(m_model, m_output, L"lossFunction");
+			// auto prediction = SquaredError(m_model, m_output, L"predictionError");
+
+			auto trainingLoss = SquaredError(m_model, m_output, L"lossFunction");
+			auto prediction = SquaredError(m_model, m_output, L"predictionError");
+			
 
             // python example
             // # loss = 'mse'
@@ -118,7 +127,7 @@ namespace Impl
             // learner = C.sgd(model.parameters, lr_schedule, gradient_clipping_threshold_per_sample = 10)
             // trainer = C.Trainer(model, (loss, meas), learner)
 
-            CNTK::LearningRateSchedule learningRatePerSample = 0.1;
+            CNTK::LearningRateSchedule learningRatePerSample = 1;
             m_trainer = CNTK::CreateTrainer(m_model, trainingLoss, prediction,
                                             {CNTK::SGDLearner(m_model->Parameters(), learningRatePerSample)});
         }
@@ -132,7 +141,9 @@ namespace Impl
         {
             const std::size_t number_of_samples = 1; // batch of 1
 
-            std::vector<ElemType> inputs(current_state.rows() * current_state.cols());
+            std::vector<ElemType> inputs(current_state.size());
+			for (int i = 0; i < current_state.size(); i++)
+				inputs[i] = current_state(i);
             CNTK::NDShape inputShape = m_input.Shape().AppendShape({1, number_of_samples});
             CNTK::ValuePtr inputValue = CNTK::MakeSharedObject<CNTK::Value>(
                 CNTK::MakeSharedObject<CNTK::NDArrayView>(inputShape, inputs, true));
@@ -182,27 +193,20 @@ namespace Impl
         std::pair<CNTK::ValuePtr, CNTK::ValuePtr> createMiniBatch(const State& state, const Action& action) const
         {
             const std::size_t batchSize = 1;
-            size_t inputDim = state.rows() * state.cols();
-            size_t numOutputClasses = action.rows() * action.cols();
 
-            std::vector<float> inputData(inputDim * batchSize);
-            size_t dataIndex = 0;
-            for(int i = 0; i < state.rows(); i++)
+            std::vector<float> inputData(state.size() * batchSize);
+            for(int i = 0; i < state.size(); i++)
             {
-                for(int j = 0; j < state.cols(); j++)
-                {
-                    inputData[dataIndex++] = state(i, j);
-                }
+                inputData[i] = state(i);
             }
-            auto inputDataValue = CNTK::Value::CreateBatch(m_input.Shape(), inputData, m_device);
+            auto inputDataValue = CNTK::Value::CreateBatch(m_input.Shape(), inputData, m_device, true);
 
-            std::vector<float> outputData(numOutputClasses * batchSize);
-            dataIndex = 0;
-            for(int n = 0; n < numOutputClasses; ++n)
+            std::vector<float> outputData(action.size() * batchSize);
+            for(int n = 0; n < action.size(); n++)
             {
-                outputData[dataIndex++] = action(n);
+                outputData[n] = action(n);
             }
-            auto outputDataValue = CNTK::Value::CreateBatch(m_output.Shape(), outputData, m_device);
+            auto outputDataValue = CNTK::Value::CreateBatch(m_output.Shape(), outputData, m_device, true);
             return std::make_pair(inputDataValue, outputDataValue);
         }
     };

@@ -20,7 +20,7 @@ public:
 
     static constexpr double GAMMA = 0.99; // discount factor
 
-    static constexpr double MAX_EPSILON = 1;
+    static constexpr double MAX_EPSILON = 0.5; // 1
     static constexpr double MIN_EPSILON = 0.01; // stay a bit curious even when getting old
     static constexpr double LAMBDA = 0.0001; // speed of decay
 

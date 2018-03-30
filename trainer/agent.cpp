@@ -47,11 +47,18 @@ double Agent::run()
 {
     double R = 0.;
     JAronda game{"11815"};
+	std::cout << "new game" << std::endl;
     State s = game.begin();
     while(true)
     {
+		std::cout << "new move: \n";
+		// std::cout << s << std::endl;
         const auto a = act(s);
+		std::cout << "playing " << a << std::endl;
         auto res = game.play(s, a);
+		std::cout << "r = " << res.reward << std::endl;
+		// if (res.new_state)
+		// 	std::cout << *res.new_state << std::endl;
 
         observe({s, a, res.reward, res.new_state});
         replay();
@@ -73,8 +80,12 @@ std::size_t Agent::act(const State& state)
 {
     if(std::uniform_real_distribution<>(0., 1.)(rng()) < m_epsilon)
         return std::uniform_int_distribution<std::size_t>(0, Aronda::State::number_of_square - 1)(rng());
-    else
-        return argmax(m_brain.predict(state));
+	else
+	{
+		const auto qmap = m_brain.predict(state);
+		std::cout << "q-map = " << qmap.transpose() << std::endl;
+		return argmax(qmap);
+	}
 }
 
 void Agent::observe(Step step)
@@ -140,6 +151,9 @@ void Agent::replay()
     const auto x = s;
     const auto y = t;
 
+	std::cout << "training : \n";
+	std::cout << "\to = " << p.transpose() << std::endl;
+	std::cout << "\ty = " << y.transpose() << std::endl;
     m_brain.train(x, y);
 }
 }
