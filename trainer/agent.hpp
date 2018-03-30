@@ -1,6 +1,6 @@
 #pragma once
 
-#include "brain.hpp"
+#include "ibrain.hpp"
 
 #include <boost/optional.hpp>
 
@@ -26,7 +26,8 @@ public:
 
     static constexpr std::size_t BATCH_SIZE = 64;
 
-    Agent() = default;
+    Agent();
+
     ~Agent() = default;
 
     double run();
@@ -34,7 +35,7 @@ public:
     void saveModel(const std::string& path) const;
 
 private:
-    Brain m_brain;
+    std::unique_ptr<IBrain> m_brain;
     std::vector<Step> m_memory;
     std::size_t m_steps = 0;
     double m_epsilon = MAX_EPSILON;

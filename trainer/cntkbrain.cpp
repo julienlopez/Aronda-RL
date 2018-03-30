@@ -1,4 +1,4 @@
-#include "brain.hpp"
+#include "cntkbrain.hpp"
 
 #include <CNTKLibrary.h>
 
@@ -58,8 +58,8 @@ namespace
         {
             double trainLossValue = trainer->PreviousMinibatchLossAverage();
             double evaluationValue = trainer->PreviousMinibatchEvaluationAverage();
-            printf("Minibatch %d: loss = %.8g, Evaluation criterion = %.8g\n", (int)minibatchIdx,
-                   trainLossValue, evaluationValue);
+            std::cout << "Minibatch " << minibatchIdx << ": loss = " << trainLossValue
+                      << ", Evaluation criterion = " << evaluationValue << std::endl;
         }
     }
 
@@ -89,14 +89,14 @@ namespace
 
 namespace Impl
 {
-    class Brain
+    class CntkBrain
     {
 
         static const std::wstring c_input_var_name;
         static const std::wstring c_output_var_name;
 
     public:
-        Brain()
+        CntkBrain()
             : m_device(CNTK::DeviceDescriptor::UseDefaultDevice())
         {
             CNTK::NDShape shape{Aronda::State::number_of_state_per_square * Aronda::State::number_of_square};
@@ -109,12 +109,11 @@ namespace Impl
             // auto trainingLoss = CrossEntropyWithSoftmax(m_model, m_output, L"lossFunction");
             // auto prediction = ClassificationError(m_model, m_output, 5, L"predictionError");
 
-			// auto trainingLoss = SquaredError(m_model, m_output, L"lossFunction");
-			// auto prediction = SquaredError(m_model, m_output, L"predictionError");
+            // auto trainingLoss = SquaredError(m_model, m_output, L"lossFunction");
+            // auto prediction = SquaredError(m_model, m_output, L"predictionError");
 
-			auto trainingLoss = SquaredError(m_model, m_output, L"lossFunction");
-			auto prediction = SquaredError(m_model, m_output, L"predictionError");
-			
+            auto trainingLoss = SquaredError(m_model, m_output, L"lossFunction");
+            auto prediction = SquaredError(m_model, m_output, L"predictionError");
 
             // python example
             // # loss = 'mse'
@@ -142,8 +141,8 @@ namespace Impl
             const std::size_t number_of_samples = 1; // batch of 1
 
             std::vector<ElemType> inputs(current_state.size());
-			for (int i = 0; i < current_state.size(); i++)
-				inputs[i] = current_state(i);
+            for(int i = 0; i < current_state.size(); i++)
+                inputs[i] = current_state(i);
             CNTK::NDShape inputShape = m_input.Shape().AppendShape({1, number_of_samples});
             CNTK::ValuePtr inputValue = CNTK::MakeSharedObject<CNTK::Value>(
                 CNTK::MakeSharedObject<CNTK::NDArrayView>(inputShape, inputs, true));
@@ -211,28 +210,28 @@ namespace Impl
         }
     };
 
-    const std::wstring Brain::c_input_var_name = L"state";
-    const std::wstring Brain::c_output_var_name = L"q_value";
+    const std::wstring CntkBrain::c_input_var_name = L"state";
+    const std::wstring CntkBrain::c_output_var_name = L"q_value";
 }
 
-Brain::Brain()
-    : m_pimpl(std::make_unique<Impl::Brain>())
+CntkBrain::CntkBrain()
+    : m_pimpl(std::make_unique<Impl::CntkBrain>())
 {
 }
 
-Brain::~Brain() = default;
+CntkBrain::~CntkBrain() = default;
 
-void Brain::save(const std::string& path) const
+void CntkBrain::impl_save(const std::string& path) const
 {
     m_pimpl->save(path);
 }
 
-Action Brain::predict(const State& current_state) const
+Action CntkBrain::impl_predict(const State& current_state) const
 {
     return m_pimpl->predict(current_state);
 }
 
-void Brain::train(const State& state, const Action& action)
+void CntkBrain::impl_train(const State& state, const Action& action)
 {
     m_pimpl->train(state, action);
 }
