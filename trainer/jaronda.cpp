@@ -21,11 +21,11 @@ namespace
         return res.dump();
     }
 
-	bool startsWith(const std::string& str, const std::string& token)
-	{
-		if (str.size() < token.size()) return false;
-		return std::equal(begin(token), end(token), begin(str));
-	}
+    bool startsWith(const std::string& str, const std::string& token)
+    {
+        if(str.size() < token.size()) return false;
+        return std::equal(begin(token), end(token), begin(str));
+    }
 }
 
 JAronda::JAronda(std::string port)
@@ -40,14 +40,13 @@ auto JAronda::impl_play(const State& state, const std::size_t action) -> MoveRes
     const auto json = encodeMove(action);
     // std::cout << "JAronda::play(" << action << ") => " << json << std::endl;
     const auto answer = m_curl->post("playMove", json);
-	if (answer.empty()) throw std::runtime_error("No answer to post");
-	if (answer.front() != '{')
-	{
-		if (startsWith(answer, "Illegal move"))
-			return { {}, -10. };
-	}
+    if(answer.empty()) throw std::runtime_error("No answer to post");
+    if(answer.front() != '{')
+    {
+        if(startsWith(answer, "Illegal move")) return {{}, -10.};
+    }
     // std::cout << answer << std::endl;
-	return { Parser::parse(answer), 0. };
+    return {Parser::parse(answer), 0.};
 }
 
 State JAronda::impl_begin()
