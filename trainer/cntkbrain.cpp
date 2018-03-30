@@ -1,4 +1,4 @@
-#include "brain.hpp"
+#include "cntkbrain.hpp"
 
 #include <CNTKLibrary.h>
 
@@ -89,14 +89,14 @@ namespace
 
 namespace Impl
 {
-    class Brain
+    class CntkBrain
     {
 
         static const std::wstring c_input_var_name;
         static const std::wstring c_output_var_name;
 
     public:
-        Brain()
+		CntkBrain()
             : m_device(CNTK::DeviceDescriptor::UseDefaultDevice())
         {
             CNTK::NDShape shape{Aronda::State::number_of_state_per_square * Aronda::State::number_of_square};
@@ -211,28 +211,28 @@ namespace Impl
         }
     };
 
-    const std::wstring Brain::c_input_var_name = L"state";
-    const std::wstring Brain::c_output_var_name = L"q_value";
+    const std::wstring CntkBrain::c_input_var_name = L"state";
+    const std::wstring CntkBrain::c_output_var_name = L"q_value";
 }
 
-Brain::Brain()
-    : m_pimpl(std::make_unique<Impl::Brain>())
+CntkBrain::CntkBrain()
+    : m_pimpl(std::make_unique<Impl::CntkBrain>())
 {
 }
 
-Brain::~Brain() = default;
+CntkBrain::~CntkBrain() = default;
 
-void Brain::save(const std::string& path) const
+void CntkBrain::save(const std::string& path) const
 {
     m_pimpl->save(path);
 }
 
-Action Brain::predict(const State& current_state) const
+Action CntkBrain::predict(const State& current_state) const
 {
     return m_pimpl->predict(current_state);
 }
 
-void Brain::train(const State& state, const Action& action)
+void CntkBrain::train(const State& state, const Action& action)
 {
     m_pimpl->train(state, action);
 }

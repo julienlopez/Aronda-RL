@@ -9,14 +9,14 @@ namespace Aronda::Trainer
 
 namespace Impl
 {
-    class Brain;
+    class CntkBrain;
 }
 
-class Brain
+class CntkBrain
 {
 public:
-    Brain();
-    ~Brain();
+    CntkBrain();
+    ~CntkBrain();
 
     void save(const std::string& path) const;
 
@@ -25,6 +25,6 @@ public:
     void train(const State& state, const Action& action);
 
 private:
-    std::unique_ptr<Impl::Brain> m_pimpl;
+    std::unique_ptr<Impl::CntkBrain> m_pimpl;
 };
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "brain.hpp"
+#include "cntkbrain.hpp"
 
 #include <boost/optional.hpp>
 
@@ -34,7 +34,7 @@ public:
     void saveModel(const std::string& path) const;
 
 private:
-    Brain m_brain;
+    CntkBrain m_brain;
     std::vector<Step> m_memory;
     std::size_t m_steps = 0;
     double m_epsilon = MAX_EPSILON;
