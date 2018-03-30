@@ -83,7 +83,12 @@ void Agent::saveModel(const std::string& path) const
     m_brain->save(path);
 }
 
-std::size_t Agent::act(const State& state)
+Action Agent::test() const
+{
+    return m_brain->predict(JAronda{"11815"}.begin());
+}
+
+std::size_t Agent::act(const State& state) const
 {
     if(std::uniform_real_distribution<>(0., 1.)(rng()) < m_epsilon)
         return std::uniform_int_distribution<std::size_t>(0, Aronda::State::number_of_square - 1)(rng());

@@ -4,7 +4,7 @@
 
 using Aronda::Trainer::Agent;
 
-const std::size_t TOTAL_EPISODES = 50;
+const std::size_t TOTAL_EPISODES = 1000;
 
 const std::size_t REWARD_TARGET = 10;
 const std::size_t BATCH_SIZE_BASELINE = 20; // Averaged over these these many episodes
@@ -35,6 +35,7 @@ int main()
                 reward_sum = 0;
             }
         }
+        std::cout << "final qmap for beginstate = " << agent.test().transpose() << std::endl;
         agent.saveModel("dqn.mod");
     }
     catch(const std::exception& ex)

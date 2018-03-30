@@ -20,7 +20,7 @@ public:
 
     static constexpr double GAMMA = 0.99; // discount factor
 
-    static constexpr double MAX_EPSILON = 0.5; // 1
+    static constexpr double MAX_EPSILON = 0.9; // 1
     static constexpr double MIN_EPSILON = 0.01; // stay a bit curious even when getting old
     static constexpr double LAMBDA = 0.0001; // speed of decay
 
@@ -34,13 +34,15 @@ public:
 
     void saveModel(const std::string& path) const;
 
+    Action test() const;
+
 private:
     std::unique_ptr<IBrain> m_brain;
     std::vector<Step> m_memory;
     std::size_t m_steps = 0;
     double m_epsilon = MAX_EPSILON;
 
-    std::size_t act(const State& s);
+    std::size_t act(const State& s) const;
 
     void observe(Step step);
 
