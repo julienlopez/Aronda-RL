@@ -16,8 +16,9 @@ namespace Aronda::Trainer
         using Container_t = std::vector<T>;
 
         Memory(const std::size_t maximum_size)
-            : m_maximum_size(m_maximum_size)
-        {}
+            : m_maximum_size(maximum_size)
+        {
+        }
 
         ~Memory() = default;
 
