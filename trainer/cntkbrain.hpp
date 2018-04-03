@@ -23,6 +23,6 @@ private:
 
     virtual Action impl_predict(const State& current_state) const override;
 
-    virtual void impl_train(const State& state, const Action& action) override;
+    virtual void impl_train(const std::vector<State>& states, const std::vector<Action>& actions) override;
 };
 }
