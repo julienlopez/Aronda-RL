@@ -108,12 +108,6 @@ namespace Impl
             getOutputVariableByName(m_model, c_output_var_name, m_output);
             m_labels = CNTK::InputVariable({ m_output.Shape().TotalSize() }, CNTK::DataType::Float, c_labels_var_name);
 
-            // auto trainingLoss = CrossEntropyWithSoftmax(m_model, m_output, L"lossFunction");
-            // auto prediction = ClassificationError(m_model, m_output, 5, L"predictionError");
-
-            // auto trainingLoss = SquaredError(m_model, m_output, L"lossFunction");
-            // auto prediction = SquaredError(m_model, m_output, L"predictionError");
-
             auto trainingLoss = SquaredError(m_model, m_labels, L"lossFunction");
             auto prediction = SquaredError(m_model, m_labels, L"predictionError");
 
@@ -172,7 +166,7 @@ namespace Impl
         void train(const std::vector<State>& states, const std::vector<Action>& actions)
         {
             Expects(states.size() == actions.size());
-            size_t outputFrequencyInMinibatches = 1;
+            const size_t outputFrequencyInMinibatches = 1;
             const auto minibatch = createMiniBatch(states, actions);
             m_trainer->TrainMinibatch({{m_input, minibatch.first}, {m_labels, minibatch.second}}, m_device);
             PrintTrainingProgress(m_trainer, 0, outputFrequencyInMinibatches);
