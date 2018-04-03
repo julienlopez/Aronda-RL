@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ibrain.hpp"
+#include "memory.hpp"
 
 #include <memory>
-#include <vector>
 
 #include <boost/optional.hpp>
 
@@ -29,6 +29,8 @@ public:
 
     static constexpr std::size_t BATCH_SIZE = 64;
 
+    static constexpr std::size_t MEMORY_CAPACITY = 100000;
+
     Agent();
 
     ~Agent() = default;
@@ -41,7 +43,7 @@ public:
 
 private:
     std::unique_ptr<IBrain> m_brain;
-    std::vector<Step> m_memory;
+    Memory<Step> m_memory;
     std::size_t m_steps = 0;
     double m_epsilon = MAX_EPSILON;
 
