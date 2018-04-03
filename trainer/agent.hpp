@@ -2,6 +2,9 @@
 
 #include "ibrain.hpp"
 
+#include <memory>
+#include <vector>
+
 #include <boost/optional.hpp>
 
 namespace Aronda::Trainer

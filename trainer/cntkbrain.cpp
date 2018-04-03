@@ -94,6 +94,7 @@ namespace Impl
 
         static const std::wstring c_input_var_name;
         static const std::wstring c_output_var_name;
+        static const std::wstring c_labels_var_name;
 
     public:
         CntkBrain()
@@ -105,6 +106,7 @@ namespace Impl
                                                              std::bind(CNTK::Sigmoid, std::placeholders::_1, L""),
                                                              c_output_var_name);
             getOutputVariableByName(m_model, c_output_var_name, m_output);
+            m_labels = CNTK::InputVariable({ m_output.Shape().TotalSize() }, CNTK::DataType::Float, c_labels_var_name);
 
             // auto trainingLoss = CrossEntropyWithSoftmax(m_model, m_output, L"lossFunction");
             // auto prediction = ClassificationError(m_model, m_output, 5, L"predictionError");
@@ -112,8 +114,8 @@ namespace Impl
             // auto trainingLoss = SquaredError(m_model, m_output, L"lossFunction");
             // auto prediction = SquaredError(m_model, m_output, L"predictionError");
 
-            auto trainingLoss = SquaredError(m_model, m_output, L"lossFunction");
-            auto prediction = SquaredError(m_model, m_output, L"predictionError");
+            auto trainingLoss = SquaredError(m_model, m_labels, L"lossFunction");
+            auto prediction = SquaredError(m_model, m_labels, L"predictionError");
 
             // python example
             // # loss = 'mse'
@@ -126,7 +128,7 @@ namespace Impl
             // learner = C.sgd(model.parameters, lr_schedule, gradient_clipping_threshold_per_sample = 10)
             // trainer = C.Trainer(model, (loss, meas), learner)
 
-            CNTK::LearningRateSchedule learningRatePerSample = 1;
+            CNTK::LearningRateSchedule learningRatePerSample = 0.01;
             m_trainer = CNTK::CreateTrainer(m_model, trainingLoss, prediction,
                                             {CNTK::SGDLearner(m_model->Parameters(), learningRatePerSample)});
         }
@@ -178,7 +180,7 @@ namespace Impl
             // outputFrequencyInMinibatches);
             // }
             const auto minibatch = createMiniBatch(state, action);
-            m_trainer->TrainMinibatch({{m_input, minibatch.first}, {m_output, minibatch.second}}, m_device);
+            m_trainer->TrainMinibatch({{m_input, minibatch.first}, {m_labels, minibatch.second}}, m_device);
             PrintTrainingProgress(m_trainer, 0, outputFrequencyInMinibatches);
         }
 
@@ -187,6 +189,7 @@ namespace Impl
         CNTK::FunctionPtr m_model;
         CNTK::Variable m_input;
         CNTK::Variable m_output;
+        CNTK::Variable m_labels;
         CNTK::TrainerPtr m_trainer;
 
         std::pair<CNTK::ValuePtr, CNTK::ValuePtr> createMiniBatch(const State& state, const Action& action) const
@@ -212,6 +215,7 @@ namespace Impl
 
     const std::wstring CntkBrain::c_input_var_name = L"state";
     const std::wstring CntkBrain::c_output_var_name = L"q_value";
+    const std::wstring CntkBrain::c_labels_var_name = L"labels";
 }
 
 CntkBrain::CntkBrain()
