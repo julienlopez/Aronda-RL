@@ -166,20 +166,14 @@ namespace Impl
             return res;
         }
 
-        void train(const State& state, const Action& action)
+        /**
+        * @pre states.size() == actions.size()
+        */
+        void train(const std::vector<State>& states, const std::vector<Action>& actions)
         {
-            const size_t minibatchSize = 1;
-            size_t numMinibatchesToTrain = 1;
+            Expects(states.size() == actions.size());
             size_t outputFrequencyInMinibatches = 1;
-            // auto minibatchSource = createMiniBatch(state, action);
-            // for (size_t i = 0; i < numMinibatchesToTrain; ++i)
-            // {
-            // 	auto minibatchData = minibatchSource->GetNextMinibatch(minibatchSize, m_device);
-            // 	m_trainer->TrainMinibatch({ { m_input, minibatchData[imageStreamInfo] },{ m_output,
-            // minibatchData[labelStreamInfo] } }, m_device); 	PrintTrainingProgress(m_trainer, i,
-            // outputFrequencyInMinibatches);
-            // }
-            const auto minibatch = createMiniBatch(state, action);
+            const auto minibatch = createMiniBatch(states, actions);
             m_trainer->TrainMinibatch({{m_input, minibatch.first}, {m_labels, minibatch.second}}, m_device);
             PrintTrainingProgress(m_trainer, 0, outputFrequencyInMinibatches);
         }
@@ -192,22 +186,31 @@ namespace Impl
         CNTK::Variable m_labels;
         CNTK::TrainerPtr m_trainer;
 
-        std::pair<CNTK::ValuePtr, CNTK::ValuePtr> createMiniBatch(const State& state, const Action& action) const
+        /**
+        * @pre states.size() == actions.size()
+        */
+        std::pair<CNTK::ValuePtr, CNTK::ValuePtr> createMiniBatch(const std::vector<State>& states, const std::vector<Action>& actions) const
         {
-            const std::size_t batchSize = 1;
+            Expects(states.size() == actions.size());
+            const std::size_t batchSize = states.size();
+            std::vector<float> inputData;
+            inputData.reserve(states.front().size() * batchSize);
+            std::vector<float> outputData;
+            outputData.reserve(actions.front().size() * batchSize);
 
-            std::vector<float> inputData(state.size() * batchSize);
-            for(int i = 0; i < state.size(); i++)
+            for (std::size_t b = 0; b < batchSize; b++)
             {
-                inputData[i] = state(i);
+                for (int i = 0; i < states[b].size(); i++)
+                {
+                    inputData.push_back(states[b](i));
+                }
+                for (int n = 0; n < actions[b].size(); n++)
+                {
+                    outputData.push_back(actions[b](n));
+                }
             }
+
             auto inputDataValue = CNTK::Value::CreateBatch(m_input.Shape(), inputData, m_device, true);
-
-            std::vector<float> outputData(action.size() * batchSize);
-            for(int n = 0; n < action.size(); n++)
-            {
-                outputData[n] = action(n);
-            }
             auto outputDataValue = CNTK::Value::CreateBatch(m_output.Shape(), outputData, m_device, true);
             return std::make_pair(inputDataValue, outputDataValue);
         }
@@ -235,8 +238,8 @@ Action CntkBrain::impl_predict(const State& current_state) const
     return m_pimpl->predict(current_state);
 }
 
-void CntkBrain::impl_train(const State& state, const Action& action)
+void CntkBrain::impl_train(const std::vector<State>& states, const std::vector<Action>& actions)
 {
-    m_pimpl->train(state, action);
+    m_pimpl->train(states, actions);
 }
 }

@@ -127,6 +127,6 @@ void Agent::replay()
         x[i] = s;
         y[i] = t;
     }
-    m_brain->train(x[0], y[1]);
+    m_brain->train(x, y);
 }
 }

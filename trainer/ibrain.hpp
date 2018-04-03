@@ -16,7 +16,10 @@ public:
 
     Action predict(const State& current_state) const;
 
-    void train(const State& state, const Action& action);
+    /**
+    * @pre states.size() == actions.size()
+    */
+    void train(const std::vector<State>& states, const std::vector<Action>& actions);
 
 protected:
     IBrain() = default;
@@ -26,6 +29,6 @@ private:
 
     virtual Action impl_predict(const State& current_state) const = 0;
 
-    virtual void impl_train(const State& state, const Action& action) = 0;
+    virtual void impl_train(const std::vector<State>& states, const std::vector<Action>& actions) = 0;
 };
 }

@@ -13,8 +13,9 @@ Action IBrain::predict(const State& current_state) const
     return impl_predict(current_state);
 }
 
-void IBrain::train(const State& state, const Action& action)
+void IBrain::train(const std::vector<State>& states, const std::vector<Action>& actions)
 {
-    impl_train(state, action);
+    Expects(states.size() == actions.size());
+    impl_train(states, actions);
 }
 }
