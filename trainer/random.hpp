@@ -15,6 +15,12 @@ namespace Aronda::Trainer
             return gen;
         }
 
+        template<class T>
+        static auto uniform(const T min, const T max)
+        {
+            return std::uniform_int_distribution<T>(min, max)(rng());
+        }
+
     }
 
 }

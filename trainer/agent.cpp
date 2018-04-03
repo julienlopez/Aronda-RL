@@ -13,7 +13,7 @@ namespace
     template <class T> auto draw(const T& container)
     {
         Expects(container.size() > 0);
-        const auto index = std::uniform_int_distribution<std::size_t>(0, container.size() - 1)(Random::rng());
+        const auto index = Random::uniform<std::size_t>(0, container.size() - 1);
         return container[index];
     }
 
@@ -83,8 +83,8 @@ Action Agent::test() const
 
 std::size_t Agent::act(const State& state) const
 {
-    if(std::uniform_real_distribution<>(0., 1.)(Random::rng()) < m_epsilon)
-        return std::uniform_int_distribution<std::size_t>(0, Aronda::State::number_of_square - 1)(Random::rng());
+    if (std::uniform_real_distribution<>(0., 1.)(Random::rng()) < m_epsilon)
+        return Random::uniform<std::size_t>(0, Aronda::State::number_of_square - 1);
     else
     {
         const auto qmap = m_brain->predict(state);
