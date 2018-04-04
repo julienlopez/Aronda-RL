@@ -102,7 +102,7 @@ namespace Impl
         {
             CNTK::NDShape shape{Aronda::State::number_of_state_per_square * Aronda::State::number_of_square};
             m_input = CNTK::InputVariable(shape, CNTK::DataType::Float, c_input_var_name);
-            m_model = FullyConnectedFeedForwardClassifierNet(m_input, Aronda::State::number_of_square, 512, 2, m_device,
+            m_model = FullyConnectedFeedForwardClassifierNet(m_input, Aronda::State::number_of_square, 2048, 10, m_device,
                                                              std::bind(CNTK::Sigmoid, std::placeholders::_1, L""),
                                                              c_output_var_name);
             getOutputVariableByName(m_model, c_output_var_name, m_output);
