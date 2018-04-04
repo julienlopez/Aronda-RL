@@ -102,11 +102,11 @@ namespace Impl
         {
             CNTK::NDShape shape{Aronda::State::number_of_state_per_square * Aronda::State::number_of_square};
             m_input = CNTK::InputVariable(shape, CNTK::DataType::Float, c_input_var_name);
-            m_model = FullyConnectedFeedForwardClassifierNet(m_input, Aronda::State::number_of_square, 2048, 10, m_device,
-                                                             std::bind(CNTK::Sigmoid, std::placeholders::_1, L""),
-                                                             c_output_var_name);
+            m_model = FullyConnectedFeedForwardClassifierNet(
+                m_input, Aronda::State::number_of_square, 2048, 10, m_device,
+                std::bind(CNTK::Sigmoid, std::placeholders::_1, L""), c_output_var_name);
             getOutputVariableByName(m_model, c_output_var_name, m_output);
-            m_labels = CNTK::InputVariable({ m_output.Shape().TotalSize() }, CNTK::DataType::Float, c_labels_var_name);
+            m_labels = CNTK::InputVariable({m_output.Shape().TotalSize()}, CNTK::DataType::Float, c_labels_var_name);
 
             auto trainingLoss = SquaredError(m_model, m_labels, L"lossFunction");
             auto prediction = SquaredError(m_model, m_labels, L"predictionError");
@@ -161,8 +161,8 @@ namespace Impl
         }
 
         /**
-        * @pre states.size() == actions.size()
-        */
+         * @pre states.size() == actions.size()
+         */
         void train(const std::vector<State>& states, const std::vector<Action>& actions)
         {
             Expects(states.size() == actions.size());
@@ -181,9 +181,10 @@ namespace Impl
         CNTK::TrainerPtr m_trainer;
 
         /**
-        * @pre states.size() == actions.size()
-        */
-        std::pair<CNTK::ValuePtr, CNTK::ValuePtr> createMiniBatch(const std::vector<State>& states, const std::vector<Action>& actions) const
+         * @pre states.size() == actions.size()
+         */
+        std::pair<CNTK::ValuePtr, CNTK::ValuePtr> createMiniBatch(const std::vector<State>& states,
+                                                                  const std::vector<Action>& actions) const
         {
             Expects(states.size() == actions.size());
             const std::size_t batchSize = states.size();
@@ -192,13 +193,13 @@ namespace Impl
             std::vector<float> outputData;
             outputData.reserve(actions.front().size() * batchSize);
 
-            for (std::size_t b = 0; b < batchSize; b++)
+            for(std::size_t b = 0; b < batchSize; b++)
             {
-                for (int i = 0; i < states[b].size(); i++)
+                for(int i = 0; i < states[b].size(); i++)
                 {
                     inputData.push_back(states[b](i));
                 }
-                for (int n = 0; n < actions[b].size(); n++)
+                for(int n = 0; n < actions[b].size(); n++)
                 {
                     outputData.push_back(actions[b](n));
                 }

@@ -17,8 +17,8 @@ public:
     Action predict(const State& current_state) const;
 
     /**
-    * @pre states.size() == actions.size()
-    */
+     * @pre states.size() == actions.size()
+     */
     void train(const std::vector<State>& states, const std::vector<Action>& actions);
 
 protected:

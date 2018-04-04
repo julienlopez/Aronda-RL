@@ -47,7 +47,7 @@ void Agent::saveModel(const std::string& path) const
 
 std::size_t Agent::act(const State& state) const
 {
-    if (std::uniform_real_distribution<>(0., 1.)(Random::rng()) < m_epsilon)
+    if(std::uniform_real_distribution<>(0., 1.)(Random::rng()) < m_epsilon)
         return Random::uniform<std::size_t>(0, Aronda::State::number_of_square - 1);
     else
     {
@@ -69,24 +69,24 @@ void Agent::replay()
     const auto batch = m_memory.sample(BATCH_SIZE);
     std::vector<State> x(batch.size());
     std::vector<Action> y(batch.size());
-    for (std::size_t i = 0; i < batch.size(); i++)
+    for(std::size_t i = 0; i < batch.size(); i++)
     {
         const auto sample = batch[i];
-    
+
         const auto state = sample.s;
         const auto state_ = sample.s_ ? *sample.s_ : State::Zero();
-    
+
         const auto p = m_brain->predict(state);
         const auto p_ = m_brain->predict(state_);
-    
+
         auto[s, a, r, s_] = sample;
-    
+
         auto t = p;
-        if (s_)
+        if(s_)
             t[a] = r + GAMMA * argmax(p_);
         else
             t[a] = r;
-    
+
         x[i] = s;
         y[i] = t;
     }

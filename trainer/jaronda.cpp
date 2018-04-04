@@ -46,11 +46,11 @@ auto JAronda::impl_play(const State& state, const std::size_t action) -> MoveRes
     }
     double reward = 0.;
     const auto res = Parser::parse(answer);
-    if (res.winner)
+    if(res.winner)
     {
         reward = *(res.winner) == res.current_player ? 1 : -1;
     }
-    return {res, reward };
+    return {res, reward};
 }
 
 auto JAronda::impl_begin() -> GameState

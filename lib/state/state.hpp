@@ -26,5 +26,4 @@ struct GameState
     Board board;
     boost::optional<Player> winner;
 };
-
 }
