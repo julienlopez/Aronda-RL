@@ -40,6 +40,14 @@ namespace
     {
         return stringToPlayer(getOrThrow<std::string>(json, "currentPlayer"));
     }
+
+    boost::optional<Player> winner(const nlohmann::json& json)
+    {
+        const auto winner_str = getOrThrow<std::string>(json, "winner");
+        if (winner_str == "BLACK") return Player::Black;
+        if (winner_str == "WHITE") return Player::White;
+        return boost::none;
+    }
 }
 
 GameState Parser::parse(const std::string& json_string)
@@ -54,7 +62,7 @@ GameState Parser::parse(const std::string& json_string)
     {
         res.row(i) = parseSquare(squares[i], current_player);
     }
-    return { current_player, res, boost::none } ; // TODO code winner
+    return { current_player, res, winner(json) } ;
 }
 
 Square Parser::parseSquare(const nlohmann::json& square, const Player current_player)

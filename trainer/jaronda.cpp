@@ -44,7 +44,13 @@ auto JAronda::impl_play(const State& state, const std::size_t action) -> MoveRes
     {
         if(startsWith(answer, "Illegal move")) return {{}, -10.};
     }
-    return {Parser::parse(answer), 0.};
+    double reward = 0.;
+    const auto res = Parser::parse(answer);
+    if (res.winner)
+    {
+        reward = *(res.winner) == res.current_player ? 1 : -1;
+    }
+    return {res, reward };
 }
 
 auto JAronda::impl_begin() -> GameState
