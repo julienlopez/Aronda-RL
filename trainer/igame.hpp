@@ -10,12 +10,14 @@ namespace Aronda::Trainer
 class IGame
 {
 public:
+    using GameState = Aronda::State::GameState;
+
     /**
      * if s_ == boost::none, game is done
      */
     struct MoveResult
     {
-        boost::optional<State> new_state;
+        boost::optional<GameState> new_state;
         double reward;
     };
 
@@ -26,7 +28,7 @@ public:
      */
     MoveResult play(const State& state, const std::size_t action);
 
-    State begin();
+    GameState begin();
 
 protected:
     IGame() = default;
@@ -34,6 +36,6 @@ protected:
 private:
     virtual MoveResult impl_play(const State& state, const std::size_t action) = 0;
 
-    virtual State impl_begin() = 0;
+    virtual GameState impl_begin() = 0;
 };
 }

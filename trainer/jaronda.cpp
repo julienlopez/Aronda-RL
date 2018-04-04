@@ -38,18 +38,22 @@ JAronda::~JAronda() = default;
 auto JAronda::impl_play(const State& state, const std::size_t action) -> MoveResult
 {
     const auto json = encodeMove(action);
-    // std::cout << "JAronda::play(" << action << ") => " << json << std::endl;
     const auto answer = m_curl->post("playMove", json);
     if(answer.empty()) throw std::runtime_error("No answer to post");
     if(answer.front() != '{')
     {
         if(startsWith(answer, "Illegal move")) return {{}, -10.};
     }
-    // std::cout << answer << std::endl;
-    return {Parser::parse(answer), 0.};
+    double reward = 0.;
+    const auto res = Parser::parse(answer);
+    if (res.winner)
+    {
+        reward = *(res.winner) == res.current_player ? 1 : -1;
+    }
+    return {res, reward };
 }
 
-State JAronda::impl_begin()
+auto JAronda::impl_begin() -> GameState
 {
     const auto answer = m_curl->get("startNewGame");
     return Parser::parse(answer);

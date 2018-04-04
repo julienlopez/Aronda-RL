@@ -7,19 +7,13 @@
 namespace Aronda::State
 {
 
-enum class Player
-{
-    Black,
-    White
-};
-
 class Parser
 {
 public:
-    static Board parse(const std::string& json_string);
+
+    static GameState parse(const std::string& json_string);
 
     static Square parseSquare(const nlohmann::json& square, const Player current_player);
 
-private:
 };
 }

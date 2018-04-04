@@ -19,6 +19,6 @@ private:
 
     virtual MoveResult impl_play(const State& state, const std::size_t action) override;
 
-    virtual State impl_begin() override;
+    virtual GameState impl_begin() override;
 };
 }

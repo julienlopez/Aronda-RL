@@ -1,9 +1,6 @@
 #include "agent.hpp"
 #include "cntkbrain.hpp"
-#include "jaronda.hpp"
 #include "random.hpp"
-
-#include <iostream>
 
 namespace Aronda::Trainer
 {
@@ -43,42 +40,9 @@ Agent::Agent()
 {
 }
 
-double Agent::run()
-{
-    double R = 0.;
-    JAronda game{"11815"};
-    std::cout << "new game" << std::endl;
-    State s = game.begin();
-    while(true)
-    {
-        std::cout << "new move: \n";
-        // std::cout << s << std::endl;
-        const auto a = act(s);
-        std::cout << "playing " << a << std::endl;
-        auto res = game.play(s, a);
-        std::cout << "r = " << res.reward << std::endl;
-        // if (res.new_state)
-        // 	std::cout << *res.new_state << std::endl;
-
-        observe({s, a, res.reward, res.new_state});
-        replay();
-
-        R += res.reward;
-        if(res.new_state)
-            s = *res.new_state;
-        else
-            return R;
-    }
-}
-
 void Agent::saveModel(const std::string& path) const
 {
     m_brain->save(path);
-}
-
-Action Agent::test() const
-{
-    return m_brain->predict(JAronda{"11815"}.begin());
 }
 
 std::size_t Agent::act(const State& state) const
@@ -88,7 +52,6 @@ std::size_t Agent::act(const State& state) const
     else
     {
         const auto qmap = m_brain->predict(state);
-        std::cout << "q-map = " << qmap.transpose() << std::endl;
         return argmax(qmap);
     }
 }
@@ -128,5 +91,10 @@ void Agent::replay()
         y[i] = t;
     }
     m_brain->train(x, y);
+}
+
+double Agent::epsilon() const
+{
+    return m_epsilon;
 }
 }
