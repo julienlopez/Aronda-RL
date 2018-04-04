@@ -25,7 +25,7 @@ public:
 
     static constexpr double MAX_EPSILON = 0.5; // 1
     static constexpr double MIN_EPSILON = 0.1; // stay a bit curious even when getting old
-    static constexpr double LAMBDA = 0.0001; // speed of decay
+    static constexpr double LAMBDA = 0.0002; // speed of decay
 
     static constexpr std::size_t BATCH_SIZE = 64;
 
@@ -42,6 +42,8 @@ public:
     void observe(Step step);
 
     void replay();
+
+    double epsilon() const;
 
 private:
     std::unique_ptr<IBrain> m_brain;

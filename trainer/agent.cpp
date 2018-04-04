@@ -92,4 +92,9 @@ void Agent::replay()
     }
     m_brain->train(x, y);
 }
+
+double Agent::epsilon() const
+{
+    return m_epsilon;
+}
 }

@@ -23,6 +23,7 @@ namespace
     {
         std::size_t number_of_moves;
         boost::optional<Player> winner;
+        double epsilon;
     };
 
     GameResult playGame(AgentContainer_t& agents)
@@ -45,7 +46,7 @@ namespace
             agent->replay();
 
             if (!res.new_state)
-                return { move_number, s.winner };
+                return { move_number, s.winner, agent->epsilon() };
 
             s = *res.new_state;
             move_number++;
@@ -54,7 +55,7 @@ namespace
 
     std::string printWinner(boost::optional<Player> winner)
     {
-        if (!winner) return "";
+        if (!winner) return " ";
         return *winner == Player::Black ? "B" : "W";
     }
 }
@@ -71,7 +72,7 @@ int main()
         for(const auto episode_number : range(TOTAL_EPISODES))
         {
             const auto res = playGame(agents);
-            std::cout << episode_number << ", " << res.number_of_moves << ", " << printWinner(res.winner) << std::endl;
+            std::cout << episode_number << ", " << res.number_of_moves << ", " << printWinner(res.winner) << ", " << res.epsilon << std::endl;
         }
         agents.at(Player::Black)->saveModel("black-dqn.mod");
         agents.at(Player::White)->saveModel("white-dqn.mod");
