@@ -35,22 +35,18 @@ public:
 
     ~Agent() = default;
 
-    double run();
-
     void saveModel(const std::string& path) const;
-
-    Action test() const;
-
-private:
-    std::unique_ptr<IBrain> m_brain;
-    Memory<Step> m_memory;
-    std::size_t m_steps = 0;
-    double m_epsilon = MAX_EPSILON;
 
     std::size_t act(const State& s) const;
 
     void observe(Step step);
 
     void replay();
+
+private:
+    std::unique_ptr<IBrain> m_brain;
+    Memory<Step> m_memory;
+    std::size_t m_steps = 0;
+    double m_epsilon = MAX_EPSILON;
 };
 }
