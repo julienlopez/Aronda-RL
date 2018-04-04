@@ -58,8 +58,8 @@ namespace
         {
             double trainLossValue = trainer->PreviousMinibatchLossAverage();
             double evaluationValue = trainer->PreviousMinibatchEvaluationAverage();
-            std::cout << "Minibatch " << minibatchIdx << ": loss = " << trainLossValue
-                      << ", Evaluation criterion = " << evaluationValue << std::endl;
+            // std::cout << "Minibatch " << minibatchIdx << ": loss = " << trainLossValue
+            //           << ", Evaluation criterion = " << evaluationValue << std::endl;
         }
     }
 

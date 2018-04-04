@@ -42,7 +42,7 @@ namespace
     }
 }
 
-Board Parser::parse(const std::string& json_string)
+GameState Parser::parse(const std::string& json_string)
 {
     Board res = Board::Zero();
     const auto json = nlohmann::json::parse(json_string);
@@ -54,7 +54,7 @@ Board Parser::parse(const std::string& json_string)
     {
         res.row(i) = parseSquare(squares[i], current_player);
     }
-    return res;
+    return { current_player, res, boost::none } ; // TODO code winner
 }
 
 Square Parser::parseSquare(const nlohmann::json& square, const Player current_player)

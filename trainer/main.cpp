@@ -14,8 +14,7 @@ using Aronda::Trainer::JAronda;
 
 using AgentContainer_t = std::map<Player, std::unique_ptr<Agent>>;
 
-const std::size_t BATCH_SIZE_BASELINE = 20; 
-const std::size_t TOTAL_EPISODES = 1000;
+const std::size_t TOTAL_EPISODES = 10000;
 
 struct GameResult
 {
@@ -31,11 +30,14 @@ GameResult playGame(AgentContainer_t& agents)
     auto s = game.begin();
     while (true)
     {
-        auto& agent = agents[Player::Black];
-        const auto a = agent->act(s);
-        auto res = game.play(s, a);
+        auto& agent = agents[s.current_player];
+        const auto a = agent->act(s.board);
+        auto res = game.play(s.board, a);
 
-        agent->observe({ s, a, res.reward, res.new_state });
+        if(res.new_state)
+            agent->observe({ s.board, a, res.reward, res.new_state->board });
+        else
+            agent->observe({ s.board, a, res.reward, boost::none });
         agent->replay();
 
         if (!res.new_state)
@@ -58,10 +60,7 @@ int main()
         for(const auto episode_number : range(TOTAL_EPISODES))
         {
             const auto res = playGame(agents);
-            if(episode_number % BATCH_SIZE_BASELINE == 0)
-            {
-                std::cout << episode_number << ", " << res.number_of_moves << std::endl;
-            }
+            std::cout << episode_number << ", " << res.number_of_moves << std::endl;
         }
         agents.at(Player::Black)->saveModel("black-dqn.mod");
         agents.at(Player::White)->saveModel("white-dqn.mod");

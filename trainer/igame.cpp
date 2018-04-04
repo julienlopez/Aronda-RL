@@ -11,7 +11,7 @@ auto IGame::play(const State& state, const std::size_t action) -> MoveResult
     return impl_play(state, action);
 }
 
-State IGame::begin()
+auto IGame::begin() -> GameState
 {
     return impl_begin();
 }
