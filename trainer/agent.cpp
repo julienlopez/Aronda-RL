@@ -2,6 +2,8 @@
 #include "cntkbrain.hpp"
 #include "random.hpp"
 
+#include <iostream>
+
 namespace Aronda::Trainer
 {
 
@@ -48,17 +50,24 @@ void Agent::saveModel(const std::string& path) const
 std::size_t Agent::act(const State& state) const
 {
     if(std::uniform_real_distribution<>(0., 1.)(Random::rng()) < m_epsilon)
+    {
+        // std::cout << "random" << std::endl;
         return Random::uniform<std::size_t>(0, Aronda::State::number_of_square - 1);
+    }
     else
     {
         const auto qmap = m_brain->predict(state);
+        // std::cout << "qmap = " << qmap.transpose() << std::endl;
         return argmax(qmap);
     }
 }
 
 void Agent::observe(Step step)
 {
-    m_memory.add(std::move(step));
+    static auto comparison = [](const Step& s1, const Step& s2) -> bool
+    {
+        return s1.s == s2.s && s1.a == s2.a;  };
+    m_memory.add(std::move(step), std::function<bool(const Step&, const Step&)>(comparison));
     // slowly decrease Epsilon based on our eperience
     m_steps += 1;
     m_epsilon = MIN_EPSILON + (MAX_EPSILON - MIN_EPSILON) * std::exp(-LAMBDA * m_steps);
