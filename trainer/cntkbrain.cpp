@@ -48,7 +48,7 @@ namespace
             classifierRoot = FullyConnectedDNNLayer(classifierRoot, hiddenLayerDim, device, nonLinearity, L"", seed);
 
         auto outputTimesParam = CNTK::Parameter({numOutputClasses, hiddenLayerDim}, CNTK::DataType::Float,
-                                                CNTK::UniformInitializer(0.5, seed), device);
+                                                CNTK::HeNormalInitializer(0.5, seed), device);
         return Times(outputTimesParam, classifierRoot, 1, outputName);
     }
 
@@ -103,7 +103,7 @@ namespace Impl
             CNTK::NDShape shape{Aronda::State::number_of_state_per_square * Aronda::State::number_of_square};
             m_input = CNTK::InputVariable(shape, CNTK::DataType::Float, c_input_var_name);
             m_model = FullyConnectedFeedForwardClassifierNet(
-                m_input, Aronda::State::number_of_square, 2048, 10, m_device,
+                m_input, Aronda::State::number_of_square, 2048, 20, m_device,
                 std::bind(CNTK::Sigmoid, std::placeholders::_1, L""), c_output_var_name);
             getOutputVariableByName(m_model, c_output_var_name, m_output);
             m_labels = CNTK::InputVariable({m_output.Shape().TotalSize()}, CNTK::DataType::Float, c_labels_var_name);

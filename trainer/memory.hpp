@@ -34,13 +34,16 @@ public:
 
     /**
      * @pre size() > 0
+     * @pre number_of_samples > 0
      */
     Container_t sample(const std::size_t number_of_samples) const
     {
         Expects(size() > 0);
+        Expects(number_of_samples > 0);
         const auto count = std::min(number_of_samples, size());
         Container_t res;
-        for(std::size_t i = 0; i < count; i++)
+        res.push_back(m_container.back());
+        for(std::size_t i = 1; i < count; i++)
         {
             const auto index = std::uniform_int_distribution<std::size_t>(0, size() - 1)(Random::rng());
             res.push_back(m_container[index]);

@@ -14,7 +14,7 @@ using Aronda::Trainer::JAronda;
 
 using AgentContainer_t = std::map<Player, std::unique_ptr<Agent>>;
 
-const std::size_t TOTAL_EPISODES = 10000;
+const std::size_t TOTAL_EPISODES = 5000;
 
 namespace
 {
@@ -25,6 +25,12 @@ struct GameResult
     boost::optional<Player> winner;
     double epsilon;
 };
+
+std::string printWinner(boost::optional<Player> winner)
+{
+    if (!winner) return " ";
+    return *winner == Player::Black ? "B" : "W";
+}
 
 GameResult playGame(AgentContainer_t& agents)
 {
@@ -37,6 +43,9 @@ GameResult playGame(AgentContainer_t& agents)
     {
         auto& agent = agents[s.current_player];
         const auto a = agent->act(s.board);
+
+        // std::cout << printWinner(s.current_player) << " plays " << a << std::endl;
+
         auto res = game.play(s.board, a);
 
         if(res.new_state)
@@ -50,12 +59,6 @@ GameResult playGame(AgentContainer_t& agents)
         s = *res.new_state;
         move_number++;
     }
-}
-
-std::string printWinner(boost::optional<Player> winner)
-{
-    if(!winner) return " ";
-    return *winner == Player::Black ? "B" : "W";
 }
 }
 
@@ -71,8 +74,7 @@ int main()
         for(const auto episode_number : range(TOTAL_EPISODES))
         {
             const auto res = playGame(agents);
-            std::cout << episode_number << ", " << res.number_of_moves << ", " << printWinner(res.winner) << ", "
-                      << res.epsilon << std::endl;
+            std::cout << episode_number << ", " << res.number_of_moves << ", " << printWinner(res.winner) << std::endl;
         }
         agents.at(Player::Black)->saveModel("black-dqn.mod");
         agents.at(Player::White)->saveModel("white-dqn.mod");
