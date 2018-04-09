@@ -31,10 +31,6 @@ namespace Impl
             curl_global_init(CURL_GLOBAL_ALL);
             m_curl = curl_easy_init();
             if(!m_curl) throw std::runtime_error("Unable to init curl");
-
-            setOption(CURLOPT_ERRORBUFFER, m_error_buffer.data());
-            setOption(CURLOPT_WRITEFUNCTION, writer);
-            setOption(CURLOPT_WRITEDATA, &m_buffer);
         }
 
         ~CurlWrapper()
@@ -45,6 +41,7 @@ namespace Impl
 
         std::string get(const std::string& action)
         {
+            refresh();
             m_buffer.clear();
             setOption(CURLOPT_URL, (m_base_url + action).c_str());
             performCurl();
@@ -53,6 +50,7 @@ namespace Impl
 
         std::string post(const std::string& action, const std::string& data)
         {
+            refresh();
             m_buffer.clear();
             setOption(CURLOPT_URL, (m_base_url + action).c_str());
             setOption(CURLOPT_POSTFIELDS, data.c_str());
@@ -66,6 +64,14 @@ namespace Impl
 
         std::array<char, CURL_ERROR_SIZE> m_error_buffer;
         std::string m_buffer;
+        
+        void refresh()
+        {
+            curl_easy_reset(m_curl);
+            setOption(CURLOPT_ERRORBUFFER, m_error_buffer.data());
+            setOption(CURLOPT_WRITEFUNCTION, writer);
+            setOption(CURLOPT_WRITEDATA, &m_buffer);
+        }
 
         void performCurl()
         {
