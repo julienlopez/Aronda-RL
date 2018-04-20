@@ -14,7 +14,7 @@ using Aronda::Trainer::JAronda;
 
 using AgentContainer_t = std::map<Player, std::unique_ptr<Agent>>;
 
-const std::size_t TOTAL_EPISODES = 5000;
+const std::size_t TOTAL_EPISODES = 20000;
 
 namespace
 {
@@ -24,6 +24,7 @@ struct GameResult
     std::size_t number_of_moves;
     boost::optional<Player> winner;
     double epsilon;
+    std::string moves;
 };
 
 std::string printWinner(boost::optional<Player> winner)
@@ -39,12 +40,14 @@ GameResult playGame(AgentContainer_t& agents)
 
     std::size_t move_number = 0;
     auto s = game.begin();
+    std::string moves;
     while(true)
     {
         auto& agent = agents[s.current_player];
         const auto a = agent->act(s.board);
 
         // std::cout << printWinner(s.current_player) << " plays " << a << std::endl;
+        moves += printWinner(s.current_player) + std::to_string(a) + ';';
 
         auto res = game.play(s.board, a);
 
@@ -54,7 +57,7 @@ GameResult playGame(AgentContainer_t& agents)
             agent->observe({s.board, a, res.reward, boost::none});
         agent->replay();
 
-        if(!res.new_state) return {move_number, s.winner, agent->epsilon()};
+        if(!res.new_state) return {move_number, s.winner, agent->epsilon(), moves};
 
         s = *res.new_state;
         move_number++;
@@ -74,7 +77,7 @@ int main()
         for(const auto episode_number : range(TOTAL_EPISODES))
         {
             const auto res = playGame(agents);
-            std::cout << episode_number << ", " << res.number_of_moves << ", " << printWinner(res.winner) << std::endl;
+            std::cout << episode_number << "," << res.number_of_moves << "," << printWinner(res.winner) << "," << res.moves << std::endl;
         }
         agents.at(Player::Black)->saveModel("black-dqn.mod");
         agents.at(Player::White)->saveModel("white-dqn.mod");
