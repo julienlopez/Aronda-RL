@@ -27,9 +27,9 @@ public:
     static constexpr double MIN_EPSILON = 0.05; // stay a bit curious even when getting old
     static constexpr double LAMBDA = 0.001; // speed of decay
 
-    static constexpr std::size_t BATCH_SIZE = 64;
+    static constexpr std::size_t BATCH_SIZE = 256;
 
-    static constexpr std::size_t MEMORY_CAPACITY = 5000; // 100000;
+    static constexpr std::size_t MEMORY_CAPACITY = 10000; // 100000;
 
     Agent();
 

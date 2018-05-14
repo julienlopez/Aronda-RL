@@ -14,7 +14,7 @@ using Aronda::Trainer::JAronda;
 
 using AgentContainer_t = std::map<Player, std::unique_ptr<Agent>>;
 
-const std::size_t TOTAL_EPISODES = 20000;
+const std::size_t TOTAL_EPISODES = 1000000;
 
 namespace
 {

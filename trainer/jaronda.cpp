@@ -42,7 +42,7 @@ auto JAronda::impl_play(const State& state, const std::size_t action) -> MoveRes
     if(answer.empty()) throw std::runtime_error("No answer to post");
     if(answer.front() != '{')
     {
-        if(startsWith(answer, "Illegal move")) return {{}, -10.};
+        if(startsWith(answer, "Illegal move")) return {{}, -1.};
     }
     double reward = 0.;
     const auto res = Parser::parse(answer);

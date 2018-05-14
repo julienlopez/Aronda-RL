@@ -67,7 +67,7 @@ void Agent::observe(Step step)
     static auto comparison = [](const Step& s1, const Step& s2) -> bool
     {
         return s1.s == s2.s && s1.a == s2.a;  };
-    m_memory.add(std::move(step), std::function<bool(const Step&, const Step&)>(comparison));
+    m_memory.add(std::move(step)/*, std::function<bool(const Step&, const Step&)>(comparison)*/);
     // slowly decrease Epsilon based on our eperience
     m_steps += 1;
     m_epsilon = MIN_EPSILON + (MAX_EPSILON - MIN_EPSILON) * std::exp(-LAMBDA * m_steps);
