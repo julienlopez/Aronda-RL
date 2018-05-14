@@ -29,7 +29,7 @@ struct GameResult
 
 std::string printWinner(boost::optional<Player> winner)
 {
-    if (!winner) return " ";
+    if(!winner) return " ";
     return *winner == Player::Black ? "B" : "W";
 }
 
@@ -74,10 +74,21 @@ int main()
         agents[Player::White] = std::make_unique<Agent>();
 
         std::size_t episode_number = 0;
+        std::size_t max_number_of_moves = 0;
         for(const auto episode_number : range(TOTAL_EPISODES))
         {
             const auto res = playGame(agents);
-            std::cout << episode_number << "," << res.number_of_moves << "," << printWinner(res.winner) << "," << res.moves << std::endl;
+            std::cout << episode_number << "," << res.number_of_moves << "," << printWinner(res.winner) << ","
+                      << res.moves << std::endl;
+            if(res.number_of_moves > max_number_of_moves)
+            {
+                if(res.number_of_moves > 30)
+                {
+                    agents.at(Player::Black)->saveModel("black-dqn-" + std::to_string(res.number_of_moves) + ".mod");
+                    agents.at(Player::White)->saveModel("white-dqn-" + std::to_string(res.number_of_moves) + ".mod");
+                }
+                max_number_of_moves = res.number_of_moves;
+            }
         }
         agents.at(Player::Black)->saveModel("black-dqn.mod");
         agents.at(Player::White)->saveModel("white-dqn.mod");
