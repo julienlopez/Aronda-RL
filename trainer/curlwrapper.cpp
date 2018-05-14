@@ -64,7 +64,7 @@ namespace Impl
 
         std::array<char, CURL_ERROR_SIZE> m_error_buffer;
         std::string m_buffer;
-        
+
         void refresh()
         {
             curl_easy_reset(m_curl);

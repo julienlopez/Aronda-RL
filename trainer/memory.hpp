@@ -28,9 +28,11 @@ public:
 
     void add(T t, boost::optional<std::function<bool(const T&, const T&)>> equality = boost::none)
     {
-        if (equality)
+        if(equality)
         {
-            if (std::find_if(begin(m_container), end(m_container), [&equality, &t](const T& current) { return (*equality)(current, t);  }) != end(m_container))
+            if(std::find_if(begin(m_container), end(m_container),
+                            [&equality, &t](const T& current) { return (*equality)(current, t); })
+               != end(m_container))
                 return;
         }
         m_container.push_back(std::move(t));
@@ -45,8 +47,7 @@ public:
     {
         Expects(size() > 0);
         Expects(number_of_samples > 0);
-        if (size() <= number_of_samples)
-            return m_container;
+        if(size() <= number_of_samples) return m_container;
         const auto count = std::min(number_of_samples, size());
         Container_t res;
         res.push_back(m_container.back());

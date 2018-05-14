@@ -22,16 +22,18 @@ namespace
 
     auto batchNorm(CNTK::FunctionPtr input, const CNTK::DeviceDescriptor& device, BatchNormParam params = {})
     {
-        auto biasParams = CNTK::Parameter({ CNTK::NDShape::InferredDimension }, (float)params.bValue, device);
-        auto scaleParams = CNTK::Parameter({ CNTK::NDShape::InferredDimension }, (float)params.scValue, device);
-        auto runningMean = CNTK::Constant({ CNTK::NDShape::InferredDimension }, 0.0f, device);
-        auto runningInvStd = CNTK::Constant({ CNTK::NDShape::InferredDimension }, 0.0f, device);
+        auto biasParams = CNTK::Parameter({CNTK::NDShape::InferredDimension}, (float)params.bValue, device);
+        auto scaleParams = CNTK::Parameter({CNTK::NDShape::InferredDimension}, (float)params.scValue, device);
+        auto runningMean = CNTK::Constant({CNTK::NDShape::InferredDimension}, 0.0f, device);
+        auto runningInvStd = CNTK::Constant({CNTK::NDShape::InferredDimension}, 0.0f, device);
         auto runningCount = CNTK::Constant::Scalar(0.0f, device);
-        return BatchNormalization(input, scaleParams, biasParams, runningMean, runningInvStd, runningCount, params.spatial, (double)params.bnTimeConst, 0.0, 1e-5 /* epsilon */);
+        return BatchNormalization(input, scaleParams, biasParams, runningMean, runningInvStd, runningCount,
+                                  params.spatial, (double)params.bnTimeConst, 0.0, 1e-5 /* epsilon */);
     }
 
-    auto FullyConnectedLinearLayer(CNTK::Variable input, size_t outputDim, const CNTK::DeviceDescriptor& device, boost::optional<BatchNormParam> bn_params,
-                                   const std::wstring& outputName = L"", unsigned long seed = 1)
+    auto FullyConnectedLinearLayer(CNTK::Variable input, size_t outputDim, const CNTK::DeviceDescriptor& device,
+                                   boost::optional<BatchNormParam> bn_params, const std::wstring& outputName = L"",
+                                   unsigned long seed = 1)
     {
         assert(input.Shape().Rank() == 1);
         size_t inputDim = input.Shape()[0];
@@ -43,21 +45,21 @@ namespace
             device, L"timesParam");
         auto timesFunction = Times(timesParam, input, L"times");
 
-        if (bn_params)
+        if(bn_params)
         {
             return batchNorm(timesFunction, device, *bn_params);
         }
         else
         {
-            auto plusParam = CNTK::Parameter({ outputDim }, 0.0f, device, L"plusParam");
+            auto plusParam = CNTK::Parameter({outputDim}, 0.0f, device, L"plusParam");
             return Plus(plusParam, timesFunction, outputName);
         }
     }
 
     auto FullyConnectedDNNLayer(CNTK::Variable input, size_t outputDim, const CNTK::DeviceDescriptor& device,
-                                const std::function<CNTK::FunctionPtr(const CNTK::FunctionPtr&)>& nonLinearity, 
-                                boost::optional<BatchNormParam> bn_params,
-                                const std::wstring& outputName = L"", unsigned long seed = 1)
+                                const std::function<CNTK::FunctionPtr(const CNTK::FunctionPtr&)>& nonLinearity,
+                                boost::optional<BatchNormParam> bn_params, const std::wstring& outputName = L"",
+                                unsigned long seed = 1)
     {
         return nonLinearity(FullyConnectedLinearLayer(input, outputDim, device, bn_params, outputName, seed));
     }
@@ -71,7 +73,8 @@ namespace
         assert(numHiddenLayers >= 1);
         auto classifierRoot = FullyConnectedDNNLayer(input, hiddenLayerDim, device, nonLinearity, bn_params, L"", seed);
         for(size_t i = 1; i < numHiddenLayers; ++i)
-            classifierRoot = FullyConnectedDNNLayer(classifierRoot, hiddenLayerDim, device, nonLinearity, bn_params, L"", seed);
+            classifierRoot
+                = FullyConnectedDNNLayer(classifierRoot, hiddenLayerDim, device, nonLinearity, bn_params, L"", seed);
 
         auto outputTimesParam = CNTK::Parameter({numOutputClasses, hiddenLayerDim}, CNTK::DataType::Float,
                                                 CNTK::HeNormalInitializer(0.5, seed), device);
@@ -133,7 +136,7 @@ namespace Impl
             m_input = CNTK::InputVariable(shape, CNTK::DataType::Float, c_input_var_name);
 
             m_model = FullyConnectedFeedForwardClassifierNet(
-                m_input, Aronda::State::number_of_square, 2048, 5, m_device, boost::none,  // BatchNormParam{},
+                m_input, Aronda::State::number_of_square, 2048, 5, m_device, boost::none, // BatchNormParam{},
                 // std::bind(CNTK::Sigmoid, std::placeholders::_1, L""), c_output_var_name);
                 std::bind(CNTK::Tanh, std::placeholders::_1, L""), c_output_var_name);
             getOutputVariableByName(m_model, c_output_var_name, m_output);
@@ -156,8 +159,9 @@ namespace Impl
             CNTK::LearningRateSchedule learningRatePerSample = 0.01;
             CNTK::AdditionalLearningOptions params;
             params.l2RegularizationWeight = 0.1;
-            m_trainer = CNTK::CreateTrainer(m_model, trainingLoss, prediction,
-                                            {CNTK::SGDLearner(m_model->Parameters(), learningRatePerSample/*, params*/)});
+            m_trainer
+                = CNTK::CreateTrainer(m_model, trainingLoss, prediction,
+                                      {CNTK::SGDLearner(m_model->Parameters(), learningRatePerSample /*, params*/)});
         }
 
         void save(const std::string& path) const
